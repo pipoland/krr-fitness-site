@@ -428,6 +428,167 @@
     .features-grid { grid-template-columns: repeat(4, 1fr); }
   }
 
+  /* ========== DESTAQUE ========== */
+  .featured-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .featured-card {
+    position: relative;
+    background: linear-gradient(135deg, #1a0f08 0%, #0a0a0a 100%);
+    border: 1px solid var(--orange);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s;
+    box-shadow: 0 4px 20px rgba(232, 99, 10, 0.1);
+  }
+
+  .featured-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 40px rgba(232, 99, 10, 0.25);
+    border-color: var(--cream);
+  }
+
+  .featured-card::before {
+    content: '';
+    position: absolute;
+    top: -2px; left: -2px; right: -2px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--orange), #ffb366, var(--orange));
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+    z-index: 2;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 0% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .featured-image {
+    width: 100%;
+    aspect-ratio: 1;
+    background: linear-gradient(135deg, #1a1a1a 0%, #050505 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .featured-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .featured-ribbon {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: var(--orange);
+    color: #000;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    z-index: 1;
+  }
+
+  .featured-info {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .featured-brand {
+    font-size: 11px;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .featured-name {
+    font-family: 'Racing Sans One', sans-serif;
+    font-size: 20px;
+    color: var(--cream);
+    line-height: 1.15;
+    margin-bottom: 14px;
+    flex: 1;
+    letter-spacing: 0.01em;
+  }
+
+  .featured-price {
+    font-family: 'Racing Sans One', sans-serif;
+    font-size: 26px;
+    color: var(--cream);
+    margin-bottom: 14px;
+    letter-spacing: 0.02em;
+  }
+
+  .featured-price .currency {
+    font-size: 14px;
+    color: var(--cream-dim);
+    margin-right: 3px;
+  }
+
+  .featured-price .old {
+    text-decoration: line-through;
+    color: var(--cream-dim);
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    margin-right: 8px;
+  }
+
+  .featured-price .promo {
+    color: var(--orange);
+  }
+
+  .featured-cta {
+    background: var(--orange);
+    color: #000;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    text-decoration: none;
+    font-family: inherit;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .featured-cta:hover {
+    background: var(--cream);
+    transform: translateY(-1px);
+  }
+
+  @media (min-width: 640px) {
+    .featured-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  }
+
+  @media (min-width: 1024px) {
+    .featured-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+
   /* ========== PRODUTOS ========== */
   .filters {
     display: flex;
@@ -964,6 +1125,19 @@
   </div>
 </section>
 
+<!-- EM DESTAQUE -->
+<section id="destaque" style="background: linear-gradient(180deg, #000 0%, #0a0a0a 100%);">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">🏆 Seleção KRR</div>
+      <h2 class="section-title">EM DESTAQUE</h2>
+      <p class="section-subtitle">Os favoritos da nossa curadoria. Produtos premium que entregam resultado de verdade.</p>
+    </div>
+
+    <div class="featured-grid reveal" id="featured"></div>
+  </div>
+</section>
+
 <!-- PRODUTOS -->
 <section id="produtos" style="background: #050505;">
   <div class="container">
@@ -1145,44 +1319,32 @@
   let activeFilter = 'todos';
   let loading = true;
 
-  // Estado de debug (remover depois que tudo estiver funcionando)
-  const DEBUG = true;
-  let debugInfo = '';
-
   async function loadProducts() {
     try {
-      debugInfo += `URL chamada: ${API_URL}\n`;
-
       const response = await fetch(API_URL);
-      debugInfo += `Status HTTP: ${response.status}\n`;
-
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
-      debugInfo += `Total de linhas retornadas pela API: ${data.length}\n`;
-
-      if (data.length > 0) {
-        debugInfo += `Campos da 1ª linha: ${Object.keys(data[0]).join(', ')}\n`;
-        debugInfo += `Valor de 'ativo' na 1ª linha: "${data[0].ativo}" (tipo: ${typeof data[0].ativo})\n`;
-      }
 
       // Filtra só produtos ativos e formata
-      const active = data.filter(p => (p.ativo || '').toString().toLowerCase().trim() === 'sim');
-      debugInfo += `Produtos com ativo="sim" após filtro: ${active.length}\n`;
-
-      products = active.map(p => ({
-        name: (p.nome || '').toString().trim(),
-        brand: (p.marca || '').toString().trim(),
-        category: (p.categoria || '').toString().trim().toLowerCase(),
-        price: formatPrice(p.preco),
-        promo: formatPrice(p.preco_promocional),
-        image: (p.imagem || '').toString().trim(),
-        badge: (p.badge || '').toString().trim().toUpperCase()
-      }));
+      products = data
+        .filter(p => (p.ativo || '').toString().toLowerCase().trim() === 'sim')
+        .map(p => ({
+          name: (p.nome || '').toString().trim(),
+          brand: (p.marca || '').toString().trim(),
+          category: (p.categoria || '').toString().trim().toLowerCase(),
+          weight: (p.peso || '').toString().trim(),
+          flavor: (p.sabor || '').toString().trim(),
+          price: formatPrice(p.preco),
+          promo: formatPrice(p.preco_promocional),
+          image: (p.imagem || '').toString().trim(),
+          badge: (p.badge || '').toString().trim().toUpperCase(),
+          featured: (p.destaque || '').toString().toLowerCase().trim() === 'sim'
+        }));
 
       loading = false;
+      renderFeatured();
       renderProducts();
     } catch (error) {
-      debugInfo += `ERRO: ${error.message}\n`;
       console.error('Erro ao carregar produtos:', error);
       loading = false;
       document.getElementById('products').innerHTML = `
@@ -1190,7 +1352,6 @@
           <p>Não foi possível carregar os produtos no momento.</p>
           <p style="margin-top: 8px;">Fale com a gente no WhatsApp para ver o catálogo completo.</p>
           <a href="#" class="btn btn-primary" style="margin-top: 20px;" onclick="openWhatsApp('Olá! Gostaria de ver o catálogo de produtos.'); return false;">Falar no WhatsApp</a>
-          ${DEBUG ? `<pre style="text-align:left;margin-top:30px;padding:16px;background:#111;border:1px solid var(--card-border);border-radius:8px;color:#0f0;font-size:11px;overflow:auto;white-space:pre-wrap;">${debugInfo}</pre>` : ''}
         </div>
       `;
     }
@@ -1206,6 +1367,48 @@
     if (isNaN(num)) return '';
     // Formata no padrão brasileiro: sempre 2 casas, vírgula decimal, ponto milhar
     return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function renderFeatured() {
+    const wrap = document.getElementById('featured');
+    const section = document.getElementById('destaque');
+    const featuredProducts = products.filter(p => p.featured);
+
+    // Esconde a seção inteira se não houver produtos em destaque
+    if (featuredProducts.length === 0) {
+      section.style.display = 'none';
+      return;
+    }
+
+    section.style.display = 'block';
+
+    wrap.innerHTML = featuredProducts.slice(0, 4).map(p => `
+      <article class="featured-card" itemscope itemtype="https://schema.org/Product">
+        <div class="featured-image">
+          ${p.image
+            ? `<img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+               <div class="product-image-placeholder" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;">KRR</div>`
+            : `<div class="product-image-placeholder">KRR</div>`
+          }
+          <div class="featured-ribbon">⭐ Destaque</div>
+        </div>
+        <div class="featured-info">
+          <div class="featured-brand" itemprop="brand">${p.brand}${p.weight ? ' · ' + p.weight : ''}</div>
+          <div class="featured-name" itemprop="name">${p.name}${p.flavor ? ' — ' + p.flavor : ''}</div>
+          <div class="featured-price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+            ${p.promo
+              ? `<span class="old">R$ ${p.price}</span><span class="currency">R$</span><span itemprop="price" class="promo">${p.promo}</span>`
+              : `<span class="currency">R$</span><span itemprop="price">${p.price}</span>`
+            }
+            <meta itemprop="priceCurrency" content="BRL">
+          </div>
+          <a href="#" class="featured-cta" onclick="openWhatsApp('Olá! Tenho interesse no ${p.name.replace(/'/g, "\\'")}${p.flavor ? ' sabor ' + p.flavor.replace(/'/g, "\\'") : ''} (${p.brand.replace(/'/g, "\\'")}). Poderia me passar mais informações?'); return false;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Tenho interesse
+          </a>
+        </div>
+      </article>
+    `).join('');
   }
 
   function renderFilters() {
@@ -1241,7 +1444,6 @@
       wrap.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--cream-dim);">
           <p>Nenhum produto nessa categoria no momento.</p>
-          ${DEBUG ? `<pre style="text-align:left;margin-top:30px;padding:16px;background:#111;border:1px solid var(--card-border);border-radius:8px;color:#0f0;font-size:11px;overflow:auto;white-space:pre-wrap;">${debugInfo}</pre>` : ''}
         </div>
       `;
       return;
@@ -1258,8 +1460,8 @@
           ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
         </div>
         <div class="product-info">
-          <div class="product-brand" itemprop="brand">${p.brand}</div>
-          <div class="product-name" itemprop="name">${p.name}</div>
+          <div class="product-brand" itemprop="brand">${p.brand}${p.weight ? ' · ' + p.weight : ''}</div>
+          <div class="product-name" itemprop="name">${p.name}${p.flavor ? ' <span style="color:var(--cream-dim);font-weight:500;">— ' + p.flavor + '</span>' : ''}</div>
           <div class="product-price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
             ${p.promo
               ? `<span style="text-decoration:line-through;color:var(--cream-dim);font-size:13px;font-family:'Inter',sans-serif;margin-right:6px;">R$ ${p.price}</span><span class="currency">R$</span><span itemprop="price" style="color:var(--orange);">${p.promo}</span>`
@@ -1293,4 +1495,4 @@
 </script>
 
 </body>
-</html> 
+</html>
